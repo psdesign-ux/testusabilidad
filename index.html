@@ -10,11 +10,20 @@
 body {
   font-family: 'Roboto', sans-serif;
   background: #1a1a2e;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 2.5rem;
-  padding: 2.5rem;
+  justify-content: center;
+}
+
+/* ─── DECK WRAPPER ─── */
+.deck {
+  position: relative;
+  width: 1440px;
+  height: 810px;
+  flex-shrink: 0;
 }
 
 /* ─── SLIDE BASE ─── */
@@ -22,12 +31,77 @@ body {
   width: 1440px;
   height: 810px;
   background: #EBEBEB;
-  position: relative;
+  position: absolute;
+  top: 0; left: 0;
   overflow: hidden;
-  flex-shrink: 0;
   box-shadow: 0 32px 80px rgba(0,0,0,0.5);
   display: flex;
   flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.slide.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ─── NAV BUTTONS ─── */
+.nav-btn {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.22);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background 0.2s;
+  color: white;
+  font-size: 30px;
+  line-height: 1;
+  user-select: none;
+}
+
+.nav-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.28);
+}
+
+#prevBtn { left: 18px; }
+#nextBtn { right: 18px; }
+
+.nav-btn:disabled {
+  opacity: 0.2;
+  cursor: default;
+}
+
+/* ─── SLIDE COUNTER DOTS ─── */
+.slide-counter {
+  position: fixed;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 1000;
+}
+
+.counter-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.28);
+  cursor: pointer;
+  transition: background 0.25s;
+  border: none;
+}
+
+.counter-dot.active {
+  background: rgba(255,255,255,0.9);
 }
 
 /* ─── HOLOGRAPHIC GRADIENT (bottom-right) ─── */
@@ -172,9 +246,11 @@ body {
 
 .app-frame img {
   width: 100%;
+  height: 100%;
   border-radius: 22px;
   object-fit: cover;
-  object-position: top;
+  object-position: top center;
+  display: block;
 }
 
 .app-caption {
@@ -492,10 +568,15 @@ body {
 </head>
 <body>
 
+<button class="nav-btn" id="prevBtn" aria-label="Anterior" onclick="navigate(-1)" disabled>&#8249;</button>
+<button class="nav-btn" id="nextBtn" aria-label="Siguiente" onclick="navigate(1)">&#8250;</button>
+
+<div class="deck" id="deck">
+
 <!-- ══════════════════════════════
      SLIDE 1
 ══════════════════════════════ -->
-<div class="slide">
+<div class="slide active">
   <div class="slide-content">
 
     <div class="slide-eyebrow">Test de Usabilidad · Chequeo Preventivo · Abril 2026</div>
@@ -595,7 +676,7 @@ body {
 
             <div class="quote-pill" style="margin-top:auto;">
               <p>"Facilita la llegada al profesional, ya él viene sabiendo que tienes hipertensión, evitamos perder tiempo."</p>
-              <span>— Transcripción T4</span>
+              <span>— Sesión U4</span>
             </div>
           </div>
 
@@ -606,7 +687,7 @@ body {
               <div class="fi-icon bad">!</div>
               <div>
                 <div class="fi-text-title">"Guiado" se asocia a acompañamiento humano</div>
-                <div class="fi-text-desc">3 de 5 esperaban una persona que los guíe en el centro clínico. T5: <em>"una enfermera, alguien que me va a ayudar paso a paso".</em></div>
+                <div class="fi-text-desc">3 de 5 esperaban una persona que los guíe en el centro clínico. U5: <em>"una enfermera, alguien que me va a ayudar paso a paso".</em></div>
               </div>
             </div>
 
@@ -628,7 +709,7 @@ body {
 
             <div class="quote-pill" style="margin-top:auto;">
               <p>"Eso de chequeo con ayuda o sin ayuda, eso no existe. Para mí guiado es que vas y una enfermera te va a guiar."</p>
-              <span>— Transcripción T5</span>
+              <span>— Sesión U5</span>
             </div>
           </div>
 
@@ -641,11 +722,7 @@ body {
   <div class="slide-footer">
     <div class="footer-team">CoE Diseño &amp; Equipo de Experiencia</div>
     <div class="footer-logo">
-      <div class="logo-circle"><div class="logo-circle-inner"></div></div>
-      <div class="logo-wordmark">
-        <span class="logo-word-main">pacífico</span>
-        <span class="logo-word-sub">salud</span>
-      </div>
+      <img src="pacifico-logo.svg" alt="Pacífico Salud" style="height:38px; width:auto; display:block;">
     </div>
   </div>
 </div>
@@ -687,7 +764,7 @@ body {
             </div>
             <div class="rat-item">
               <div class="rat-dot"></div>
-              <span>El valor que perciben los usuarios es que el médico llegue informado: <em>"ya él viene sabiendo que tienes hipertensión"</em> (T4). Eso es permanente, no puntual.</span>
+              <span>El valor que perciben los usuarios es que el médico llegue informado: <em>"ya él viene sabiendo que tienes hipertensión"</em> (U4). Eso es permanente, no puntual.</span>
             </div>
             <div class="rat-item">
               <div class="rat-dot"></div>
@@ -727,15 +804,15 @@ body {
           <div class="rationale">
             <div class="rat-item">
               <div class="rat-dot"></div>
-              <span>3 de 5 interpretaron "guiado" como acompañamiento humano en el centro clínico. T5: <em>"una enfermera, un técnico, alguien te va a guiar".</em> La expectativa no se cumple.</span>
+              <span>3 de 5 usuarios interpretaron "guiado" como acompañamiento humano en el centro clínico. Un usuario: <em>"una enfermera, un técnico, alguien te va a guiar".</em> La expectativa no se cumple.</span>
             </div>
             <div class="rat-item">
               <div class="rat-dot"></div>
-              <span>Usuarios que entendieron el guiado también lo rechazaron: T6 dijo <em>"no creo en eso"</em> — desconfían de que un test de 2 min elija mejor que el especialista.</span>
+              <span>Usuarios que entendieron el guiado también lo rechazaron: U6 dijo <em>"no creo en eso"</em> — desconfían de que un test de 2 min elija mejor que el especialista.</span>
             </div>
             <div class="rat-item">
               <div class="rat-dot"></div>
-              <span>Comportamiento observado: quienes eligen integral igualmente desmarcan evaluaciones al ver la lista (T6 quitó psicología por tiempo, T0 dudó sobre odontológico).</span>
+              <span>Comportamiento observado: quienes eligen integral igualmente desmarcan evaluaciones al ver la lista (U6 quitó psicología por tiempo, U1 dudó sobre odontológico).</span>
             </div>
             <div class="rat-item">
               <div class="rat-dot"></div>
@@ -756,14 +833,80 @@ body {
   <div class="slide-footer">
     <div class="footer-team">CoE Diseño &amp; Equipo de Experiencia</div>
     <div class="footer-logo">
-      <div class="logo-circle"><div class="logo-circle-inner"></div></div>
-      <div class="logo-wordmark">
-        <span class="logo-word-main">pacífico</span>
-        <span class="logo-word-sub">salud</span>
-      </div>
+      <img src="pacifico-logo.svg" alt="Pacífico Salud" style="height:38px; width:auto; display:block;">
     </div>
   </div>
 </div>
+
+</div><!-- /deck -->
+
+<div class="slide-counter">
+  <button class="counter-dot active" data-index="0" aria-label="Diapositiva 1"></button>
+  <button class="counter-dot" data-index="1" aria-label="Diapositiva 2"></button>
+</div>
+
+<script>
+(function () {
+  const slides = document.querySelectorAll('.deck .slide');
+  const dots   = document.querySelectorAll('.counter-dot');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const deck    = document.getElementById('deck');
+  let current   = 0;
+
+  function goTo(n) {
+    slides[current].classList.remove('active');
+    dots[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    dots[current].classList.add('active');
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === slides.length - 1;
+  }
+
+  function navigate(dir) {
+    const next = current + dir;
+    if (next >= 0 && next < slides.length) goTo(next);
+  }
+
+  window.navigate = navigate;
+  window.goTo = goTo;
+
+  dots.forEach(d => d.addEventListener('click', () => goTo(+d.dataset.index)));
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown')  navigate(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')    navigate(-1);
+  });
+
+  /* Touch / swipe */
+  let touchX = 0;
+  document.addEventListener('touchstart', function (e) { touchX = e.touches[0].clientX; }, {passive: true});
+  document.addEventListener('touchend', function (e) {
+    const diff = touchX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 45) navigate(diff > 0 ? 1 : -1);
+  }, {passive: true});
+
+  /* Responsive scaling — keeps desktop layout, scales to viewport */
+  function scaleSlide() {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const scaleX = vw / 1440;
+    const scaleY = vh / 810;
+    const scale  = Math.min(scaleX, scaleY);
+    const left   = Math.round((vw - 1440 * scale) / 2);
+    const top    = Math.round((vh - 810  * scale) / 2);
+    deck.style.transformOrigin = 'top left';
+    deck.style.transform = 'scale(' + scale + ')';
+    deck.style.position  = 'fixed';
+    deck.style.left      = left + 'px';
+    deck.style.top       = top  + 'px';
+  }
+
+  scaleSlide();
+  window.addEventListener('resize', scaleSlide);
+})();
+</script>
 
 </body>
 </html>
